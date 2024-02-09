@@ -45,3 +45,7 @@ variable "parameter_group_name" {
 variable "skip_final_snapshot" {
     type    = bool
 }
+
+variable "publicly_accessible" {
+    type = bool
+}
