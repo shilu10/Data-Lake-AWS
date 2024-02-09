@@ -1,6 +1,6 @@
 
-module 'crm'{
-    path='../modules/database/'
+module "crm"{
+    source="./modules/database/"
 
     allocated_storage = var.crm_allocated_storage
     backup_retention_period = var.crm_backup_retention_period
@@ -14,4 +14,22 @@ module 'crm'{
     storage_encrypted = var.crm_storage_encrypted 
     parameter_group_name = var.crm_parameter_group_name 
     skip_final_snapshot = var.crm_skip_final_snapshot
+}
+
+
+module "saas"{
+    source="./modules/database/"
+
+    allocated_storage = var.saas_allocated_storage
+    backup_retention_period = var.saas_backup_retention_period
+    engine = var.saas_engine
+    engine_version = var.saas_engine_version 
+    identifier = var.saas_identifier 
+    instance_class = var.saas_instance_class 
+    multi_az = var.saas_multi_az 
+    username = var.saas_username 
+    password = var.saas_password 
+    storage_encrypted = var.saas_storage_encrypted 
+    parameter_group_name = var.saas_parameter_group_name 
+    skip_final_snapshot = var.saas_skip_final_snapshot
 }
