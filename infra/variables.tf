@@ -46,7 +46,9 @@ variable "crm_skip_final_snapshot" {
     type    = bool
 }
 
-
+variable "crm_publicly_accessible" {
+    type = bool
+}
 
 
 
@@ -97,4 +99,8 @@ variable "saas_parameter_group_name" {
 
 variable "saas_skip_final_snapshot" {
     type    = bool
+}
+
+variable "saas_publicly_accessible" {
+    type = bool
 }
