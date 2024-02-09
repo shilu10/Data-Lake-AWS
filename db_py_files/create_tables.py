@@ -119,19 +119,28 @@ def arg_parse():
 
     parser.add_argument('--username', 
                         default='admin',
-                        help="Username for the database")
+                        help="Username for the database", 
+                        type=str)
 
     parser.add_argument('--password', 
                         default='password',
-                        help="Password for the database")
+                        help="Password for the database", 
+                        type=str)
 
     parser.add_argument('--host', 
                         default='0.0.0.0',
-                        help="Either endpoint or ip add of database")
+                        help="Either endpoint or ip add of database", 
+                        type=str)
 
     parser.add_argument('--database-name', 
                         default='tickit',
-                        help="Database Name")
+                        help="Database Name", 
+                        type=str)
+
+    parser.add_argument('--port', 
+                        default=3306,
+                        help="Port number of DBMs", 
+                        type=int)
 
     args = parser.parse_args()
     return args
@@ -140,7 +149,8 @@ def arg_parse():
 def get_db_object(args):
     connection = mysql.connector.connect(user=args.username, 
                                     password=args.password, 
-                                    host=args.host)
+                                    host=args.host, 
+                                    port=args.port)
 
     cursor = connection.cursor()
 
@@ -158,11 +168,11 @@ def create_database(cursor, name):
 
 # create database and tables
 def main(args):
+    db_name = args.database_name
     try:
         connection, cursor = get_db_object(args)
-        db_name = args.database_name
-
         cursor.execute("USE {}".format(db_name))
+        
     except mysql.connector.Error as err:
         print("Database {} does not exists.".format(db_name))
         if err.errno == errorcode.ER_BAD_DB_ERROR:
@@ -191,5 +201,5 @@ def main(args):
 
 
 if __name__ == '__main__':
-    args = parse_args()
+    args = arg_parse()
     main(args)
