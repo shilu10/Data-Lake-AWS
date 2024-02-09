@@ -19,6 +19,9 @@ DATA_DETAILS = {
         'delimiter': '|', 
         'dtypes': {
             'event_id': int,
+            'venue_id': int,
+            'cat_id': int,
+            'date_id': int,
         }
     },
 
@@ -39,7 +42,6 @@ DATA_DETAILS = {
         'delimiter': '|',
         'dtypes': {
             'venue_id': int,
-            'venue_seats': int,
         }
     },
 
@@ -129,6 +131,11 @@ def arg_parse():
                         help="Database Name", 
                         type=str)
 
+    parser.add_argument('--tables-to-include', 
+                        default=['category', 'event', 'venue'],
+                        help="Port number of DBMs", 
+                        type=list)
+
     args = parser.parse_args()
     return args 
 
@@ -158,13 +165,19 @@ def load_data_into_db(dataframe, table_name):
 
 
 def main(args):
-    for table_name, data in DATA_DETAILS.items():
+    for table_name in args.tables_to_include:
+        data = DATA_DETAILS[table_name]
+
         # load the data from s3 as df 
         s3_url = args.s3_bucket_arn + '/' + data.get('filename')
         df = pd.read_csv(s3_url, 
                         delimiter=data.get('delimiter'),
                         names=data.get('col_names'), 
                         dtype=data.get('dtypes'))
+
+        if table_name == "venue":
+            #df['venue_seats'][df['venue_seats'] == '\\N'] = None
+            df.loc[df['venue_seats'] == '\\N', 'venue_seats'] = None
         
         # load data into database tables
         load_data_into_db(df, table_name)
