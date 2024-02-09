@@ -141,6 +141,11 @@ def arg_parse():
                         default=3306,
                         help="Port number of DBMs", 
                         type=int)
+    
+    parser.add_argument('--tables-to-include', 
+                        default=['category', 'event', 'venue'],
+                        help="Port number of DBMs", 
+                        type=list)
 
     args = parser.parse_args()
     return args
@@ -172,7 +177,7 @@ def main(args):
     try:
         connection, cursor = get_db_object(args)
         cursor.execute("USE {}".format(db_name))
-        
+
     except mysql.connector.Error as err:
         print("Database {} does not exists.".format(db_name))
         if err.errno == errorcode.ER_BAD_DB_ERROR:
@@ -183,7 +188,7 @@ def main(args):
             print(err)
             exit(1)
 
-    for table_name in TABLES:
+    for table_name in args.tables_to_include:
         table_description = TABLES[table_name]
         try:
             print("Creating table {}: ".format(table_name), end='')

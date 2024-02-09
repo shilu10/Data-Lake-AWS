@@ -17,3 +17,5 @@ aws s3api create-bucket --bucket=<bucket-name> --region=us-east-1
 aws s3 cp Downloads/tickitdb/ s3://tickit-data-1/ --recursive 
 
 
+### Create S3 for terraform backend
+aws s3api create-bucket --bucket=tickit-backend --region=us-east-1
