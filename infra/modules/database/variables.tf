@@ -49,3 +49,11 @@ variable "skip_final_snapshot" {
 variable "publicly_accessible" {
     type = bool
 }
+
+variable "storage_type" {
+    type = string 
+}
+
+variable "db_subnet_group_name" {
+    type = string 
+}
