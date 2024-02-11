@@ -54,10 +54,7 @@ variable "crm_publicly_accessible" {
     type = bool
 }
 
-variable "crm_db_subnet_group_name" {
-     type = string 
 
-}
 
 
 variable "saas_allocated_storage" {
@@ -116,10 +113,6 @@ variable "saas_publicly_accessible" {
     type = bool
 }
 
-variable "saas_db_subnet_group_name" {
-     type = string 
-     
-}
 
 
 
