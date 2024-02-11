@@ -59,7 +59,7 @@ module "crm"{
     parameter_group_name = var.crm_parameter_group_name 
     skip_final_snapshot = var.crm_skip_final_snapshot
 
-    db_subnet_group_name = var.crm_db_subnet_group_name
+    db_subnet_group_name = aws_db_subnet_group.default.name
 }
 
 
@@ -81,5 +81,5 @@ module "saas"{
     parameter_group_name = var.saas_parameter_group_name 
     skip_final_snapshot = var.saas_skip_final_snapshot
 
-    db_subnet_group_name = var.saas_db_subnet_group_name
+    db_subnet_group_name = aws_db_subnet_group.default.name
 }
