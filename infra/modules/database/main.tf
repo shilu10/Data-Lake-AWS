@@ -9,6 +9,8 @@ resource "aws_db_instance" "this" {
   multi_az                    = var.multi_az # Custom for Oracle does not support multi-az
   password                    = var.password
   username                    = var.username
+  db_subnet_group_name = var.db_subnet_group_name
+  storage_type = var.storage_type
   publicly_accessible = var.publicly_accessible
   storage_encrypted           = var.storage_encrypted
   parameter_group_name = var.parameter_group_name
