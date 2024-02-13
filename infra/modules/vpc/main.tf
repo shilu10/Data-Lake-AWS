@@ -1,3 +1,7 @@
+
+###################
+# VPC 
+###################
 resource "aws_vpc" "this" {
   for_each             = var.vpc_parameters
   cidr_block           = each.value.cidr_block
@@ -7,6 +11,7 @@ resource "aws_vpc" "this" {
     Name : each.key
   })
 }
+
 
 resource "aws_subnet" "this" {
   for_each   = var.subnet_parameters

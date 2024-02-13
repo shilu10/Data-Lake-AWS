@@ -10,11 +10,14 @@ resource "aws_db_instance" "this" {
   password                    = var.password
   username                    = var.username
   db_subnet_group_name = var.db_subnet_group_name
+  vpc_security_group_ids = var.vpc_security_group_ids
+
   storage_type = var.storage_type
   publicly_accessible = var.publicly_accessible
   storage_encrypted           = var.storage_encrypted
   parameter_group_name = var.parameter_group_name
   skip_final_snapshot  = var.skip_final_snapshot
+
 
   timeouts {
     create = "3h"
