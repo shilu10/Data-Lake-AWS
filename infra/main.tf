@@ -155,3 +155,22 @@ module "saas"{
     vpc_security_group_ids = [module.db_security_group.id]
 }
 
+
+# Provisioner to create a database after the RDS instance is created
+resource "null_resource" "create_database" {
+  depends_on = [module.saas]
+
+  connection {
+    host     = module.saas.endpoint
+    user     = module.saas.username
+    password = module.saas.password
+    port     = module.saas.port
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      export PGPASSWORD="${module.saas.password}"
+      psql -h "${aws_db_instance.example.endpoint}" -U "${aws_db_instance.example.username}" -d postgres -c "CREATE DATABASE tickit;"
+    EOT
+  }
+}
