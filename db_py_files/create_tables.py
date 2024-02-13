@@ -166,6 +166,7 @@ def create_database(cursor, name):
     try:
         cursor.execute(
             "CREATE DATABASE {} DEFAULT CHARACTER SET 'utf8'".format(name))
+        
     except mysql.connector.Error as err:
         print("Failed creating database: {}".format(err))
         exit(1)
