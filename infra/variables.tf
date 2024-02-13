@@ -1,3 +1,8 @@
+
+#####################
+# CRM DB
+######################
+
 variable "crm_allocated_storage" {
     type    = number
 }
@@ -56,6 +61,9 @@ variable "crm_publicly_accessible" {
 
 
 
+#########################
+## SAAS DB
+#########################
 
 variable "saas_allocated_storage" {
     type    = number
@@ -115,7 +123,100 @@ variable "saas_publicly_accessible" {
 
 
 
+#######################
+## EC2
+#######################
 
+variable "ec2_instance_type"{
+  type = string 
+}
+
+variable "ec2_associate_public_ip_address"{
+  type = bool 
+}
+
+variable "ec2_key_name" {
+    type = string 
+}
+
+variable "ec2_key_filename" {
+    type = string 
+}
+
+variable "ec2_tags" {
+  type = map(string)
+}
+
+
+
+####################
+# Security Groups
+####################
+
+variable "db_security_group_name"{
+  type = string
+}
+
+variable "db_security_group_description"{
+  type = string
+}
+
+variable "db_sg_ingress_parameters"{
+  type = map(object({
+       cidr_ipv4 = string
+       from_port     = number
+       to_port = number
+       ip_protocol = string
+    }))
+}
+
+variable "db_sg_egress_parameters"{
+  type = map(object({
+       cidr_ipv4 = string
+
+       ip_protocol = string
+    }))
+}
+
+variable "db_sg_tags" {
+  type = map(string)
+}
+
+# ec2
+variable "ec2_security_group_name"{
+  type = string
+}
+
+variable "ec2_security_group_description"{
+  type = string
+}
+
+variable "ec2_sg_ingress_parameters"{
+  type = map(object({
+       cidr_ipv4 = string
+       from_port     = number
+       to_port = number
+       ip_protocol = string
+    }))
+}
+
+variable "ec2_sg_egress_parameters"{
+  type = map(object({
+       cidr_ipv4 = string
+
+       ip_protocol = string
+    }))
+}
+
+variable "ec2_sg_tags" {
+  type = map(string)
+}
+
+
+
+########################
+## VPC
+########################
 
 variable "vpc_parameters" {
   description = "VPC parameters"

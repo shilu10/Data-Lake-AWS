@@ -1,4 +1,8 @@
-module tickit_vpc {
+
+#####################################
+# VPC 
+#####################################
+module "tickit_vpc" {
     source = "./modules/vpc/"
 
     vpc_parameters = var.vpc_parameters
@@ -8,39 +12,104 @@ module tickit_vpc {
     rt_association_parameters = var.rt_association_parameters
 }
 
-resource "aws_security_group" "allow_all" {
-  name        = "allow_all"
-  description = "Allow All inbound traffic and all outbound traffic"
-  vpc_id      = module.tickit_vpc.vpcs["vpc1"].id
 
-  tags = {
-    Name = "allow_tls"
-  }
+########################################
+# Security Groups
+########################################
+module "db_security_group" {
+  source = "./modules/security_group"
+
+  security_group_name = var.db_security_group_name
+  security_group_description = var.db_security_group_description
+  vpc_id = module.tickit_vpc.vpcs["vpc_tickit"].id
+  sg_ingress_parameters = var.db_sg_ingress_parameters
+  sg_egress_parameters = var.db_sg_egress_parameters
+
+  tags = var.db_sg_tags
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_all" {
-  security_group_id = aws_security_group.allow_all.id
-  cidr_ipv4         = "0.0.0.0/0"
-  from_port         = -1 # semantically equivalent to all ports
-  ip_protocol       = "all"
-  to_port           = -1 # semantically equivalent to all ports
+module "ec2_security_group" {
+  source = "./modules/security_group"
+
+  security_group_name = var.ec2_security_group_name
+  security_group_description = var.ec2_security_group_description
+  vpc_id = module.tickit_vpc.vpcs["vpc_tickit"].id
+  sg_ingress_parameters = var.ec2_sg_ingress_parameters
+  sg_egress_parameters = var.ec2_sg_egress_parameters
+
+  tags = var.ec2_sg_tags
 }
 
-resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
-  security_group_id = aws_security_group.allow_all.id
-  cidr_ipv4         = "0.0.0.0/0"
-  ip_protocol       = "-1" # semantically equivalent to all ports
-}
 
+########################################
+# Database Subnet Group
+########################################
 resource "aws_db_subnet_group" "default" {
   name       = "main"
-  subnet_ids = [module.tickit_vpc.subnets["subnet1"].id, module.tickit_vpc.subnets["subnet2"].id]
+  subnet_ids = [module.tickit_vpc.subnets["private_subnet_1"].id, module.tickit_vpc.subnets["private_subnet_2"].id]
 
   tags = {
     Name = "My DB subnet group"
   }
 }
 
+#####################################
+# AMI 
+#####################################
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] # Canonical
+}
+
+######################################
+# Key Pair 
+######################################
+resource "aws_key_pair" "this" {
+key_name = var.ec2_key_name
+public_key = tls_private_key.this.public_key_openssh
+}
+
+resource "tls_private_key" "this" {
+algorithm = "RSA"
+rsa_bits  = 4096
+}
+
+resource "local_file" "this" {
+content  = tls_private_key.this.private_key_pem
+filename = var.ec2_key_filename
+}
+
+#######################################
+# Ec2 instance 
+#######################################
+resource "aws_instance" "this" {
+  ami = data.aws_ami.ubuntu.id
+  subnet_id = module.tickit_vpc.subnets["public_subnet_1"].id
+
+  associate_public_ip_address = var.ec2_associate_public_ip_address
+  instance_type = var.ec2_instance_type 
+
+  key_name = aws_key_pair.this.key_name
+  security_groups = [module.ec2_security_group.id]
+
+  tags = var.ec2_tags
+
+}
+
+########################################
+# Databases 
+########################################
 module "crm"{
     source="./modules/database/"
 
@@ -60,6 +129,7 @@ module "crm"{
     skip_final_snapshot = var.crm_skip_final_snapshot
 
     db_subnet_group_name = aws_db_subnet_group.default.name
+    vpc_security_group_ids = [module.db_security_group.id]
 }
 
 
@@ -82,4 +152,6 @@ module "saas"{
     skip_final_snapshot = var.saas_skip_final_snapshot
 
     db_subnet_group_name = aws_db_subnet_group.default.name
+    vpc_security_group_ids = [module.db_security_group.id]
 }
+
