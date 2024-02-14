@@ -140,6 +140,12 @@ def arg_parse():
                         help="Port number of DBMs", 
                         type=list)
 
+    parser.add_argument('--rdbms-type', 
+                        default="mysql",
+                        choices=["mysql", "postgres"],
+                        help="Either Mysql or postgres is supported", 
+                        type=str)
+
     args = parser.parse_args()
     return args 
 
@@ -147,12 +153,17 @@ def arg_parse():
 def __create_engine(args):
     try:
         if args.rdbms_type == "mysql":
+            print("in")
             db_url_str = f'mysql+pymysql://{args.username}:{args.password}@{args.host}/{args.database_name}'
             engine = create_engine(db_url_str)
+
+            return engine 
         
         elif args.rdbms_type == "postgres":
             db_url_str = f'postgresql+psycopg2://{args.username}:{args.password}@{args.host}/{args.database_name}'
             engine = create_engine(db_url_str)
+
+            return engine 
 
         else: 
             raise NotSupportedError("Provided RDBMS is not supported")
