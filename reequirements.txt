@@ -1,0 +1,9 @@
+boto3 
+pandas 
+numpy 
+sqlalchemy 
+mysql.conectir 
+postgres connector 
+s3fs
+boto3 
+pymysql
