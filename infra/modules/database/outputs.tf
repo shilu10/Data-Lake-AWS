@@ -13,3 +13,7 @@ output "endpoint" {
 output "status" {
     value = aws_db_instance.this.status
 }
+
+output "port" {
+    value = aws_db_instance.this.port
+}
