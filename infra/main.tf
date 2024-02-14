@@ -105,6 +105,15 @@ resource "aws_instance" "this" {
 
   tags = var.ec2_tags
 
+  user_data = <<-EOF
+              #!/bin/bash
+              apt install python3-pip 
+              apt install mysql-server
+              pip3 install mysql-connector 
+              pip3 install pandas sqlalchemy psycopg2-binary
+              # Add additional commands or configurations here
+            EOF
+
 }
 
 ########################################
@@ -153,24 +162,4 @@ module "saas"{
 
     db_subnet_group_name = aws_db_subnet_group.default.name
     vpc_security_group_ids = [module.db_security_group.id]
-}
-
-
-# Provisioner to create a database after the RDS instance is created
-resource "null_resource" "create_database" {
-  depends_on = [module.saas]
-
-  connection {
-    host     = module.saas.endpoint
-    user     = module.saas.username
-    password = module.saas.password
-    port     = module.saas.port
-  }
-
-  provisioner "local-exec" {
-    command = <<EOT
-      export PGPASSWORD="${module.saas.password}"
-      psql -h "${aws_db_instance.example.endpoint}" -U "${aws_db_instance.example.username}" -d postgres -c "CREATE DATABASE tickit;"
-    EOT
-  }
 }

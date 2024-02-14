@@ -4,11 +4,15 @@ import mysql.connector
 from mysql.connector import errorcode
 from sqlalchemy import create_engine
 
+import psycopg2
+
 import pandas as pd 
 import numpy as np 
 
 import boto3
 from argparse import ArgumentParser
+
+from exceptions import NotSupportedError
 
 
 DATA_DETAILS = {
@@ -140,10 +144,27 @@ def arg_parse():
     return args 
 
 
-def load_data_into_db(dataframe, table_name):
+def __create_engine(args):
     try:
-        db_url_str = f'mysql+pymysql://{args.username}:{args.password}@{args.host}/{args.database_name}'
-        engine = create_engine(db_url_str)
+        if args.rdbms_type == "mysql":
+            db_url_str = f'mysql+pymysql://{args.username}:{args.password}@{args.host}/{args.database_name}'
+            engine = create_engine(db_url_str)
+        
+        elif args.rdbms_type == "postgres":
+            db_url_str = f'postgresql+psycopg2://{args.username}:{args.password}@{args.host}/{args.database_name}'
+            engine = create_engine(db_url_str)
+
+        else: 
+            raise NotSupportedError("Provided RDBMS is not supported")
+
+    except Exception as err:
+        print(err)
+
+
+def load_data_into_db(args, dataframe, table_name):
+    try:
+        
+        engine = __create_engine(args)
 
         with engine.begin() as conn:
             # Invoke DataFrame method to_sql() to
@@ -180,7 +201,7 @@ def main(args):
             df.loc[df['venue_seats'] == '\\N', 'venue_seats'] = None
         
         # load data into database tables
-        load_data_into_db(df, table_name)
+        load_data_into_db(args, df, table_name)
         
 
 if __name__ == '__main__':
