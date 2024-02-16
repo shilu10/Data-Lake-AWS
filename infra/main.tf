@@ -165,13 +165,67 @@ module "saas"{
 }
 
 
+#######################
+# IAM for GLUE 
+########################
+resource "aws_iam_role" "this" {
+  name = "crawler_role"
+  
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "glue.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "this" {
+  name   = "crawler_policy"
+  role   = aws_iam_role.this.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "rds:DescribeDBInstances",
+          "rds:ListTagsForResource",
+          "rds:DescribeDBClusters",
+          "rds:DescribeDBClusterSnapshots",
+          "rds:DescribeDBSnapshots",
+          "rds:ListTagsForResource",
+          "rds:ListTagsForResource",
+          "rds:ListTagsForResource",
+          "rds:DownloadDBLogFilePortion",
+          "rds:ViewDBLogFiles",
+          "rds:ListTagsForResource",
+          "rds-db:connect"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+
+############################
+## GLUE 
+############################
+
 module "crm_glue" {
   source = "./modules/glue/"
 
   jdbc_connection_url = "jdbc:mysql://${module.crm.endpoint}"
   connection_username = var.crm_username
   connection_password = var.crm_password 
-  #availability_zone = var.crm_availability_zone 
+  availability_zone = "us-east-1a"
   subnet_id = module.tickit_vpc.subnets["private_subnet_1"].id
   security_group_id_list = [module.db_security_group.id]
    
@@ -179,7 +233,7 @@ module "crm_glue" {
 
   glue_connection_name = var.crm_glue_connection_name
   glue_crawler_name = var.crm_glue_crawler_name 
-  iam_role_arn = var.crm_glue_crawler_name 
+  iam_role_arn = aws_iam_role.this.arn 
   database_name = var.crm_database_name 
 
 }

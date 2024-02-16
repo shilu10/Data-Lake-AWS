@@ -8,7 +8,7 @@ resource "aws_glue_connection" "this" {
   name = var.glue_connection_name
 
   physical_connection_requirements {
-  #  availability_zone      = var.availability_zone
+    availability_zone      = var.availability_zone
     security_group_id_list = var.security_group_id_list
     subnet_id              = var.subnet_id
   }
