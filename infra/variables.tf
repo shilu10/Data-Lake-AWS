@@ -273,3 +273,20 @@ variable "rt_association_parameters" {
   }))
   default = {}
 }
+
+# CRM glue
+variable "crm_glue_catalog_database_name" {
+  type = string 
+}
+
+variable "crm_glue_connection_name" {
+  type = string 
+}
+
+variable "crm_glue_crawler_name" {
+  type = string 
+}
+
+variable "crm_database_name" {
+  type = string 
+}
