@@ -163,3 +163,23 @@ module "saas"{
     db_subnet_group_name = aws_db_subnet_group.default.name
     vpc_security_group_ids = [module.db_security_group.id]
 }
+
+
+module "crm_glue" {
+  source = "./modules/glue/"
+
+  jdbc_connection_url = "jdbc:mysql://${module.crm.endpoint}"
+  connection_username = var.crm_username
+  connection_password = var.crm_password 
+  #availability_zone = var.crm_availability_zone 
+  subnet_id = module.tickit_vpc.subnets["private_subnet_1"].id
+  security_group_id_list = [module.db_security_group.id]
+   
+  glue_catalog_database_name = var.crm_glue_catalog_database_name 
+
+  glue_connection_name = var.crm_glue_connection_name
+  glue_crawler_name = var.crm_glue_crawler_name 
+  iam_role_arn = var.crm_glue_crawler_name 
+  database_name = var.crm_database_name 
+
+}

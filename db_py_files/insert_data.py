@@ -146,6 +146,16 @@ def arg_parse():
                         help="Either Mysql or postgres is supported", 
                         type=str)
 
+    parser.add_argument('--start-index', 
+                        default=0,
+                        help="It defines at which index the dataframe starts from.", 
+                        type=int)
+
+    parser.add_argument('--end-index', 
+                        default=10,
+                        help="It defines at which index the dataframe ends at. when -1 is given it ends last index of df", 
+                        type=int)
+
     args = parser.parse_args()
     return args 
 
@@ -210,6 +220,14 @@ def main(args):
         if table_name == "venue":
             #df['venue_seats'][df['venue_seats'] == '\\N'] = None
             df.loc[df['venue_seats'] == '\\N', 'venue_seats'] = None
+
+        start_index = args.start_index
+        end_index = args.end_index 
+        if end_index == -1:
+            df = df.iloc[start_index: ]
+
+        else:
+            df = df.iloc[start_index: end_index]
         
         # load data into database tables
         load_data_into_db(args, df, table_name)
