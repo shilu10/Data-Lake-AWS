@@ -37,6 +37,8 @@ def arg_parse():
     
     parser.add_argument('--tables-to-include', 
                         default=['category', 'event', 'venue'],
+                        choices=['category', 'event', 'venue',
+                                         'date', 'user', 'sales', 'listing']
                         help="Port number of DBMs", 
                         type=list)
 

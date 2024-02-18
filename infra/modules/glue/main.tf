@@ -28,3 +28,13 @@ resource "aws_glue_crawler" "this" {
     path            = var.database_name
   }
 }
+
+
+#resource "aws_glue_job" "this" {
+ # name     = var.job_name
+  #role_arn = var.job_iam_tole_arn
+
+  #command {
+   # script_location = var.script_s3_location
+  #}
+#}

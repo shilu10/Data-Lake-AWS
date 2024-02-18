@@ -19,3 +19,16 @@ aws s3 cp Downloads/tickitdb/ s3://tickit-data-1/ --recursive
 
 ### Create S3 for terraform backend
 aws s3api create-bucket --bucket=tickit-backend --region=us-east-1
+
+### Steps to create table and populate data into database tables
+- Login to the Database EC2 instance:
+    $ chmod 400 private_key.pem 
+    $ ssh -i private_key.pem ubuntu@public_ec2_ip 
+    $ sudo su - 
+    $ apt update -y 
+    $ apt install python3-pip --quiet 
+    $ git clone 
+    $ pip3 install -r requirements.txt
+python3 create_table.py --host=0.0.0.0 --username='admin' --password='secret' --port=3306 --rdbms-type='mysql' --database-name='tickit' --tables-to-include=['category', 'venue']
+
+python3 --insert_data.py --host=0.0.0.0 --username='admin' --password='secret' --rdbms-type='mysql' --database-name='tickit' --tables-to-include=['category', 'venue']
