@@ -41,3 +41,15 @@ variable "iam_role_arn" {
 variable "database_name" {
     type = string 
 }
+
+#variable "job_name" {
+ #   type = string 
+#}
+
+#variable "job_iam_tole_arn" {
+ #   type = string 
+#}
+
+#variable "script_s3_location" {
+ #   type = string 
+#}
