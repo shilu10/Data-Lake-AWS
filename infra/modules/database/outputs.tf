@@ -17,3 +17,7 @@ output "status" {
 output "port" {
     value = aws_db_instance.this.port
 }
+
+output "availability_zone" {
+    value = aws_db_instance.this.availability_zone
+}
