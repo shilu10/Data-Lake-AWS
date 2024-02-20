@@ -1,4 +1,3 @@
-
 #####################################
 # VPC 
 #####################################
@@ -40,18 +39,31 @@ module "ec2_security_group" {
   tags = var.ec2_sg_tags
 }
 
+resource "aws_security_group" "self_referencing" {
+  name        = "self-referencing-sg"
+  description = "Allow ingress from the same security group"
+  vpc_id      = module.tickit_vpc.vpcs["vpc_tickit"].id
 
-########################################
-# Database Subnet Group
-########################################
-resource "aws_db_subnet_group" "default" {
-  name       = "main"
-  subnet_ids = [module.tickit_vpc.subnets["private_subnet_1"].id, module.tickit_vpc.subnets["private_subnet_2"].id]
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self = true
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+
+    cidr_blocks      = ["10.0.0.0/16"]
+  }
 
   tags = {
-    Name = "My DB subnet group"
+    Name = "self-referencing-sg"
   }
 }
+
 
 #####################################
 # AMI 
@@ -117,6 +129,19 @@ resource "aws_instance" "this" {
 }
 
 ########################################
+# Database Subnet Group 
+########################################
+resource "aws_db_subnet_group" "this" {
+  name       = "crm"
+  subnet_ids = [module.tickit_vpc.subnets["private_subnet_1"].id, module.tickit_vpc.subnets["private_subnet_2"].id]
+
+  tags = {
+    Name = "CRM Subnet Group"
+  }
+}
+
+
+########################################
 # Databases 
 ########################################
 module "crm"{
@@ -137,8 +162,8 @@ module "crm"{
     parameter_group_name = var.crm_parameter_group_name 
     skip_final_snapshot = var.crm_skip_final_snapshot
 
-    db_subnet_group_name = aws_db_subnet_group.default.name
-    vpc_security_group_ids = [module.db_security_group.id]
+    db_subnet_group_name = aws_db_subnet_group.this.name
+    vpc_security_group_ids = [module.db_security_group.id, aws_security_group.self_referencing.id]
 }
 
 
@@ -160,8 +185,8 @@ module "saas"{
     parameter_group_name = var.saas_parameter_group_name 
     skip_final_snapshot = var.saas_skip_final_snapshot
 
-    db_subnet_group_name = aws_db_subnet_group.default.name
-    vpc_security_group_ids = [module.db_security_group.id]
+    db_subnet_group_name = aws_db_subnet_group.this.name
+    vpc_security_group_ids = [module.db_security_group.id, aws_security_group.self_referencing.id]
 }
 
 
@@ -195,18 +220,7 @@ resource "aws_iam_role_policy" "this" {
       {
         Effect   = "Allow",
         Action   = [
-          "rds:DescribeDBInstances",
-          "rds:ListTagsForResource",
-          "rds:DescribeDBClusters",
-          "rds:DescribeDBClusterSnapshots",
-          "rds:DescribeDBSnapshots",
-          "rds:ListTagsForResource",
-          "rds:ListTagsForResource",
-          "rds:ListTagsForResource",
-          "rds:DownloadDBLogFilePortion",
-          "rds:ViewDBLogFiles",
-          "rds:ListTagsForResource",
-          "rds-db:connect"
+          "*"
         ],
         Resource = "*"
       }
@@ -214,6 +228,14 @@ resource "aws_iam_role_policy" "this" {
   })
 }
 
+
+locals {
+  subnet_id_1 = module.tickit_vpc.subnets["private_subnet_1"].id
+}
+
+locals {
+  subnet_id_2 = module.tickit_vpc.subnets["private_subnet_2"].id
+}
 
 ############################
 ## GLUE 
@@ -225,9 +247,9 @@ module "crm_glue" {
   jdbc_connection_url = "jdbc:mysql://${module.crm.endpoint}"
   connection_username = var.crm_username
   connection_password = var.crm_password 
-  availability_zone = "us-east-1a"
-  subnet_id = module.tickit_vpc.subnets["private_subnet_1"].id
-  security_group_id_list = [module.db_security_group.id]
+  availability_zone = module.crm.availability_zone
+  subnet_id = module.crm.availability_zone == "us-east-1a" ? local.subnet_id_1 : local.subnet_id_2
+  security_group_id_list = [aws_security_group.self_referencing.id]
    
   glue_catalog_database_name = var.crm_glue_catalog_database_name 
 

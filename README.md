@@ -27,8 +27,11 @@ aws s3api create-bucket --bucket=tickit-backend --region=us-east-1
     $ sudo su - 
     $ apt update -y 
     $ apt install python3-pip --quiet 
-    $ git clone 
+    $ export ACCESS_TOKEN="your_access_token" 
+    $ export SECRET_ACCESS_TOKEN="your_secret_access_token"
+    $ git clone https://github.com/shilu10/Data-Lake-AWS.git
+    $ cd Data-Lake-AWS/
     $ pip3 install -r requirements.txt
-python3 create_table.py --host=0.0.0.0 --username='admin' --password='secret' --port=3306 --rdbms-type='mysql' --database-name='tickit' --tables-to-include=['category', 'venue']
-
-python3 --insert_data.py --host=0.0.0.0 --username='admin' --password='secret' --rdbms-type='mysql' --database-name='tickit' --tables-to-include=['category', 'venue']
+    $ cd db_py_files/
+    $ python3 create_tables.py --host=0.0.0.0 --username='admin' --password='secret' --port=3306 --rdbms-type='mysql' --database-name='tickit' --tables-to-include=['category', 'venue']
+    $ python3 --insert_data.py --host=0.0.0.0 --username='admin' --password='secret' --rdbms-type='mysql' --database-name='tickit' --tables-to-include=['category', 'venue']
