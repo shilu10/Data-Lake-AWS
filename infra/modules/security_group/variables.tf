@@ -27,7 +27,6 @@ variable "sg_ingress_parameters" {
 variable "sg_egress_parameters" {
 	type = map(object({
        cidr_ipv4 = string
-
        ip_protocol = string
     }))
 }

@@ -4,6 +4,9 @@
 module "tickit_vpc" {
     source = "./modules/vpc/"
 
+    use_nat_gateway = var.use_nat_gateway
+    nat_gateway_params = var.nat_gateway_params 
+    eip_params = var.eip_params
     vpc_parameters = var.vpc_parameters
     subnet_parameters = var.subnet_parameters 
     igw_parameters = var.igw_parameters 
@@ -51,19 +54,22 @@ resource "aws_security_group" "self_referencing" {
     self = true
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-
-    cidr_blocks      = ["10.0.0.0/16"]
-  }
-
   tags = {
     Name = "self-referencing-sg"
   }
 }
 
+module "glue_security_group" {
+  source = "./modules/security_group"
+
+  security_group_name = var.glue_security_group_name
+  security_group_description = var.glue_security_group_description
+  vpc_id = module.tickit_vpc.vpcs["vpc_tickit"].id
+  sg_ingress_parameters = var.glue_sg_ingress_parameters
+  sg_egress_parameters = var.glue_sg_egress_parameters
+
+  tags = var.db_sg_tags
+}
 
 #####################################
 # AMI 
@@ -249,7 +255,7 @@ module "crm_glue" {
   connection_password = var.crm_password 
   availability_zone = module.crm.availability_zone
   subnet_id = module.crm.availability_zone == "us-east-1a" ? local.subnet_id_1 : local.subnet_id_2
-  security_group_id_list = [aws_security_group.self_referencing.id]
+  security_group_id_list = [aws_security_group.self_referencing.id, module.glue_security_group.id]
    
   glue_catalog_database_name = var.crm_glue_catalog_database_name 
 

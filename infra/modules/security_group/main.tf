@@ -22,8 +22,8 @@ resource "aws_vpc_security_group_ingress_rule" "this" {
 
 resource "aws_vpc_security_group_egress_rule" "this" {
 	for_each = var.sg_egress_parameters
-  	security_group_id = aws_security_group.this.id
 
+  	security_group_id = aws_security_group.this.id
   	cidr_ipv4         = each.value.cidr_ipv4
   	ip_protocol       = each.value.ip_protocol
 }
