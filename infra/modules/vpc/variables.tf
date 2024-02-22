@@ -37,9 +37,11 @@ variable "rt_parameters" {
   type = map(object({
     vpc_name = string
     tags     = map(string)
+
     routes = list(object({
       cidr_block = string
       use_igw    = bool
+      use_ng = bool
       gateway_id = string
     }))
   }))
@@ -51,5 +53,28 @@ variable "rt_association_parameters" {
     subnet_name = string
     rt_name     = string
   }))
+  default = {}
+}
+
+variable "use_nat_gateway" {
+  type = bool
+
+  default = false 
+}
+
+variable "nat_gateway_params" {
+  type = map(object({
+    subnet_name = string 
+    eip_name = string
+  }))
+
+  default = {}
+}
+
+variable "eip_params" {
+  type = map(object({
+    domain = string 
+  }))
+
   default = {}
 }

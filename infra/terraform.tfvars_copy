@@ -1,0 +1,228 @@
+#################
+# CRM Database
+#################
+
+crm_allocated_storage = 10 
+crm_backup_retention_period = 7 
+crm_engine = "mysql"
+crm_engine_version = "5.7"
+crm_instance_class = "db.t3.micro"
+crm_identifier = "tickit-crm" 
+crm_multi_az = false 
+crm_username = "admin" 
+crm_password = "shilu1234" 
+crm_storage_type = "gp2"
+crm_storage_encrypted = false
+crm_parameter_group_name = "default.mysql5.7"
+crm_skip_final_snapshot = true 
+crm_publicly_accessible = false
+
+
+##################
+# SAAS DB
+##################
+
+saas_allocated_storage = 10 
+saas_backup_retention_period = 7 
+saas_engine = "postgres"
+saas_engine_version = "15.2"
+saas_instance_class = "db.t3.micro"
+saas_identifier = "tickit-saas" 
+saas_multi_az = false 
+saas_username = "shilu" 
+saas_password = "shilu1234" 
+saas_storage_type = "gp2" 
+saas_storage_encrypted = false
+saas_parameter_group_name = "default.postgres15"
+saas_skip_final_snapshot = true 
+saas_publicly_accessible = false
+
+
+#################
+# EC2
+#################
+
+ec2_key_filename = "database-acessable-ec2"
+ec2_key_name = "database-acessable-ec2"
+ec2_associate_public_ip_address = true 
+ec2_instance_type = "t2.micro"
+ec2_tags = {
+    "Name": "Tickit-DB-Instance"
+    "Deployment": "Production"
+}
+
+
+##################
+# Security Group
+##################
+
+db_security_group_name = "allow_vpc_cidr"
+db_security_group_description = "Allow only the VPC Cidr Traffic"
+db_sg_ingress_parameters = {
+    ingress_rule_1 = {
+        count = 1 
+        cidr_ipv4 = "10.0.0.0/16"
+        from_port = -1
+        to_port = -1 
+        ip_protocol = "-1"
+    }
+
+}
+
+db_sg_egress_parameters = {
+    egress_rule = {
+        count = 1 
+        cidr_ipv4 = "10.0.0.0/16"
+        ip_protocol = "-1"
+    }
+
+}
+
+db_sg_tags = {"Name" = "tickit-db"}
+
+ec2_security_group_name = "allow_all"
+ec2_security_group_description = "Allow all Traffic"
+ec2_sg_ingress_parameters = {
+    ingress_rule_1 = {
+        count = 1
+        cidr_ipv4 = "0.0.0.0/0"
+        from_port = -1
+        to_port = -1
+        ip_protocol = "-1"
+    }
+
+}
+
+ec2_sg_egress_parameters = {
+    egress_rule = {
+        count = 1 
+        cidr_ipv4 = "0.0.0.0/0"
+        ip_protocol = "-1"
+    }
+
+}
+
+ec2_sg_tags = {"Name" = "tickit-ec2"}
+
+
+glue_security_group_name = "access_outside"
+glue_security_group_description = "Allowing the Glue to access the internet"
+glue_sg_ingress_parameters = {
+    ingress_rule_1 = {
+        count = 0
+        cidr_ipv4 = "10.0.0.0/16"
+        from_port = -1
+        to_port = -1
+        ip_protocol = "-1"
+    }
+
+}
+
+glue_sg_egress_parameters = {
+    egress_rule = {
+        count = 1 
+        cidr_ipv4 = "0.0.0.0/0"
+        ip_protocol = "-1"
+    }
+
+}
+
+glue_sg_tags = {"Name" = "tickit-glue"}
+
+
+#####################
+# VPC 
+#####################
+
+vpc_parameters = {
+    vpc_tickit = {
+        cidr_block = "10.0.0.0/16"
+        enable_dns_support = true 
+        enable_dns_hostnames = true
+
+        tags = {
+            Name = "tickit-vpc"
+        }
+    }
+}
+
+subnet_parameters = {
+    private_subnet_1 = {
+        cidr_block = "10.0.1.0/24"
+        vpc_name = "vpc_tickit"
+        availability_zone = "us-east-1a"
+        map_public_ip_on_launch = false 
+
+        tags = {
+            Name = "tickit-private-subnet-1"
+        }
+    }
+
+    private_subnet_2 = {
+        cidr_block = "10.0.2.0/24"
+        vpc_name = "vpc_tickit"
+        availability_zone = "us-east-1b"
+        enable_dns64 = false 
+        map_public_ip_on_launch = false 
+
+        tags = {
+            Name = "tickit-private-subnet-2"
+        }
+    }
+
+    public_subnet_1 = {
+        cidr_block = "10.0.3.0/24"
+        vpc_name = "vpc_tickit"
+        availability_zone = "us-east-1c"
+        enable_dns64 = false 
+        map_public_ip_on_launch = true 
+
+        tags = {
+            Name = "tickit-public-subnet-1"
+        }
+    }
+}
+
+igw_parameters = {
+    igw_tickit = {
+        vpc_name = "vpc_tickit" 
+
+        tags = {
+            Name = "tickit-igw"
+        }
+    }
+}
+
+rt_parameters = {
+    rt_tickit = {
+        vpc_name = "vpc_tickit" 
+
+        routes = [{
+            cidr_block = "0.0.0.0/0"
+            use_igw = true
+            gateway_id = "igw_tickit"}
+        ]
+
+        tags = {
+            Name = "tickit-rt"
+        }
+    }
+}
+
+
+ rt_association_parameters = {
+    assoc1 = {
+      subnet_name = "public_subnet_1"
+      rt_name     = "rt_tickit"
+
+      tags = {
+            Name = "tickit"
+        }
+    }
+  }
+
+## CRM GLUE 
+crm_glue_catalog_database_name = "tickit_db"
+crm_glue_connection_name = "tickit_connection" 
+crm_database_name = "tickit" 
+crm_glue_crawler_name = "tickit_glue_crawler" 

@@ -13,9 +13,6 @@ resource "aws_vpc" "this" {
 }
 
 
-###################
-# Subnet
-###################
 resource "aws_subnet" "this" {
   for_each   = var.subnet_parameters
   vpc_id     = aws_vpc.this[each.value.vpc_name].id
@@ -28,10 +25,6 @@ resource "aws_subnet" "this" {
   })
 }
 
-
-###################
-# InterNet Gateway 
-###################
 resource "aws_internet_gateway" "this" {
   for_each = var.igw_parameters
   vpc_id   = aws_vpc.this[each.value.vpc_name].id
@@ -40,34 +33,23 @@ resource "aws_internet_gateway" "this" {
   })
 }
 
-
-###################
-# NAT Gateway
-###################
-resource "aws_nat_gateway" "this" {
-  for_each = var.use_nat_gateway ? var.nat_gateway_params : {}
-
-  allocation_id = aws_eip.this[each.value.eip_name].id
-  subnet_id     = aws_subnet.this[each.value.subnet_name].id
+### nat gateway 
+# Create a NAT Gateway in the public subnet
+resource "aws_nat_gateway" "example" {
+  count = var.use_nat_gateway ? 1 : 0
+  allocation_id = aws_eip.this.id
+  subnet_id     = var.nat_public_subnet_id
 }
 
-
-###################
-# Elastic IP 
-###################
+# Create an Elastic IP for the NAT Gateway
 resource "aws_eip" "this" {
-  for_each = var.use_nat_gateway ? var.eip_params : {}
-
-  domain   = each.value.domain
+  count = var.use_nat_gateway ? 1 : 0
+  domain   = "vpc"
 }
 
 
-####################
-# Route Table 
-####################
 resource "aws_route_table" "this" {
   for_each = var.rt_parameters
-
   vpc_id   = aws_vpc.this[each.value.vpc_name].id
   tags = merge(each.value.tags, {
     Name : each.key
@@ -77,15 +59,12 @@ resource "aws_route_table" "this" {
     for_each = each.value.routes
     content {
       cidr_block = route.value.cidr_block
-      gateway_id = route.value.use_igw ? aws_internet_gateway.this[route.value.gateway_id].id : route.value.use_ng ? aws_nat_gateway.this[route.value.gateway_id].id : route.value.gateway_id
+      gateway_id = route.value.use_igw ? aws_internet_gateway.this[route.value.gateway_id].id : route.value.gateway_id
+    
     }
   }
 }
 
-
-##########################
-# Route table association 
-##########################
 resource "aws_route_table_association" "this" {
   for_each       = var.rt_association_parameters
   subnet_id      = aws_subnet.this[each.value.subnet_name].id

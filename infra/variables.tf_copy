@@ -193,6 +193,7 @@ variable "ec2_security_group_description"{
 
 variable "ec2_sg_ingress_parameters"{
   type = map(object({
+       count = int
        cidr_ipv4 = string
        from_port     = number
        to_port = number
@@ -202,6 +203,7 @@ variable "ec2_sg_ingress_parameters"{
 
 variable "ec2_sg_egress_parameters"{
   type = map(object({
+       count = int
        cidr_ipv4 = string
        ip_protocol = string
     }))
@@ -221,6 +223,7 @@ variable "glue_security_group_description" {
 
 variable "glue_sg_ingress_parameters" {
   type = map(object({
+       count = int
        cidr_ipv4 = string
        from_port     = number
        to_port = number
@@ -230,6 +233,7 @@ variable "glue_sg_ingress_parameters" {
 
 variable "glue_sg_egress_parameters" {
   type = map(object({
+       count = int
        cidr_ipv4 = string
        ip_protocol = string
     }))
@@ -285,13 +289,11 @@ variable "rt_parameters" {
     routes = list(object({
       cidr_block = string
       use_igw    = bool
-      use_ng= bool
       gateway_id = string
     }))
   }))
   default = {}
 }
-
 variable "rt_association_parameters" {
   description = "RT association parameters"
   type = map(object({
@@ -301,34 +303,7 @@ variable "rt_association_parameters" {
   default = {}
 }
 
-
-variable "use_nat_gateway" {
-  type = bool
-
-  default = false 
-}
-
-variable "nat_gateway_params" {
-  type = map(object({
-    subnet_name = string 
-    eip_name = string
-  }))
-
-  default = {}
-}
-
-variable "eip_params" {
-  type = map(object({
-    domain = string 
-  }))
-
-  default = {}
-}
-
-
-####################
-# CRM GLUE 
-####################
+# CRM glue
 variable "crm_glue_catalog_database_name" {
   type = string 
 }
