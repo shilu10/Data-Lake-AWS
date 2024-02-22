@@ -36,9 +36,10 @@ def arg_parse():
                         type=int)
     
     parser.add_argument('--tables-to-include', 
-                        default=['category', 'event', 'venue'],
+                        nargs='+',
+                        default='category event venue',
                         help="Port number of DBMs", 
-                        type=list)
+                        required=True)
 
     parser.add_argument('--rdbms-type', 
                         default="mysql",
@@ -129,8 +130,10 @@ def main(args):
         connection, cursor = get_db_object(args)
 
         if args.rdbms_type == "mysql":
-            cursor.execute(f"CREATE DATABASE {db_name}")
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name}")
             cursor.execute("USE {}".format(db_name))
+
+            print("in", args.tables_to_include)
 
         for table_name in args.tables_to_include:
             table_description = TABLES[table_name]
